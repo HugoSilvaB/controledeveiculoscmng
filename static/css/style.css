@@ -1,0 +1,133 @@
+/* Configuração Global */
+body {
+    background-image: url('../images/fundo.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar Fluida */
+.nav-institucional { 
+    background-color: #003366; 
+    border-bottom: 3px solid #ffc107; 
+    padding: 0.7rem 2rem !important;
+    width: 100%;
+}
+
+.logo-navbar { 
+    height: 48px; 
+    width: auto; 
+}
+
+/* Containers de Conteúdo */
+.container-usuario {
+    background-color: rgba(255, 255, 255, 0.96);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+/* Tabela e Formulário */
+.table-custom thead th {
+    background-color: #003366;
+    color: white;
+    border: none;
+    padding: 15px;
+}
+
+/* Botões: transição apenas nas propriedades visuais (não layout) */
+.btn-custom {
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color .3s ease, box-shadow .3s ease, transform .2s ease;
+}
+
+/* Bolinha de Alerta */
+@keyframes blinker { 50% { opacity: 0; } }
+.bolinha-alerta {
+    height: 12px; width: 12px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    display: inline-block;
+    animation: blinker 1s linear infinite;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+}
+
+.titulo-branco-sombra {
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Cria uma sombra para leitura */
+}
+
+/* Modal base (escuro) */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+.modal {
+    background: rgba(0, 0, 0, 0.8); /* Fundo escuro para destacar a foto */
+}
+
+/* Miniaturas: transição somente do filtro (evita reflows/tremores) */
+.img-miniatura { 
+    height: 80px; 
+    width: 100%; 
+    object-fit: cover; 
+    cursor: pointer; 
+    border-radius: 6px; 
+    border: 1px solid #ddd;
+    /* transição limitada ao filtro para não afetar layout */
+    transition: filter .18s ease-in-out;
+}
+.img-miniatura:hover { 
+    filter: brightness(0.8);
+}
+
+/* Evita transições longas/animacoes indesejadas no modal do Bootstrap */
+.modal,
+.modal-backdrop,
+.modal-dialog {
+  transition: none !important;
+  -webkit-transition: none !important;
+  animation-duration: .25s !important;
+  -webkit-animation-duration: .25s !important;
+}
+
+/* Força backdrop escuro consistente (opcional) */
+.modal-backdrop.show {
+  opacity: 0.6 !important;
+}
+
+/* Garante que modais não sejam afetados por transforms de ancestrais */
+.modal {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Evita tremor: desativa hover/transition das miniaturas e cards enquanto o modal está aberto */
+body.modal-open .card-ocorrencia,
+body.modal-open .card-ocorrencia:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Desativa efeitos interativos nas miniaturas enquanto modal aberto (impede reações ao hover) */
+body.modal-open .img-miniatura {
+  transition: none !important;
+  filter: none !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Se houver outras regras globais de transition que afetem elementos
+   considere restringi-las; procure por 'transition: all' e evite */

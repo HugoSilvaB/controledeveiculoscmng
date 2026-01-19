@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Chegada - Câmara de Novo Gama</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        body { 
+            background-image: url("{{ url_for('static', filename='images/fundo.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .main-container {
+            background-color: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            max-width: 550px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 100px; display: block; margin: 0 auto 15px;">
+        <h2 class="text-center h4 fw-bold mb-4" style="color: #003366;">REGISTRAR CHEGADA</h2>
+
+        {% if not registros %}
+            <div class="alert alert-info text-center shadow-sm border-0">
+                <i class="bi bi-info-circle-fill d-block fs-2 mb-2"></i>
+                Nenhum veículo em uso no momento.
+                <br>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm mt-3 fw-bold text-uppercase">Voltar ao Início</a>
+            </div>
+        {% else %}
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small text-secondary">VEÍCULO EM USO</label>
+                    {{ form.registro_id(class="form-select border-primary-subtle") }}
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small text-secondary">KM ATUAL (RETORNO)</label>
+                    {{ form.km_chegada(class="form-control border-primary-subtle", placeholder="Ex: 15450") }}
+                </div>
+
+                <hr class="my-4 opacity-10">
+
+                <div class="p-3 rounded-3 mb-3" style="background-color: rgba(220, 53, 69, 0.05); border: 1px dashed #dc3545;">
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small text-danger">
+                            <i class="bi bi-exclamation-triangle-fill"></i> HOUVE ALGUM IMPREVISTO? (OPCIONAL)
+                        </label>
+                        <textarea name="observacoes" class="form-control border-danger-subtle" rows="3" 
+                                  placeholder="Relate aqui: pneu furado, batida, atraso, barulho no motor, etc."></textarea>
+                    </div>
+
+                    <div class="mb-0 text-start">
+                        <label class="form-label fw-bold small text-danger">FOTO DO DANO / IMPREVISTO</label>
+                        <!-- Permite múltiplos arquivos -->
+                        <input type="file" name="foto_ocorrencia" class="form-control border-danger-subtle" accept="image/*" multiple>
+                    </div>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label class="form-label fw-bold small text-secondary">FOTO DO PAINEL (OBRIGATÓRIO)</label>
+                    {{ form.foto_km_chegada(class="form-control border-primary-subtle") }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm py-3 text-uppercase">
+                        Finalizar e Entregar Veículo
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-link text-decoration-none text-secondary">Cancelar</a>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

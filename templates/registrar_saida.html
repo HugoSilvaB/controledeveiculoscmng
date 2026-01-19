@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Saída - Câmara de Novo Gama</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        body { 
+            background-image: url("{{ url_for('static', filename='images/fundo.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            background-color: rgba(255, 255, 255, 0.96);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            max-width: 550px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .form-label { font-size: 0.8rem; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container shadow-lg">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" style="width: 100px; margin-bottom: 15px;">
+        
+        <h2 class="h4 fw-bold mb-1" style="color: #003366;">REGISTRAR SAÍDA</h2>
+        <p class="text-muted small mb-4">"Segurança em primeiro lugar. Boa viagem!"</p>
+
+        <form method="POST" enctype="multipart/form-data" id="form-saida">
+            {{ form.csrf_token }}
+
+            <div class="mb-3 text-start">
+                <label class="form-label fw-bold text-secondary text-uppercase">Veículo Disponível</label>
+                <!-- Select manual para poder controlar disabled das opções -->
+                <select name="{{ form.veiculo_modelo.name }}" id="veiculo_modelo" class="form-select border-primary-subtle form-select-lg">
+                    <option value="">-- Selecione o veículo --</option>
+                    {% for v in veiculos %}
+                        <option value="{{ v.id }}"
+                                {% if v.id in ocupados %} disabled data-em-uso="1" {% else %} data-em-uso="0" {% endif %}
+                                {% if form.veiculo_modelo.data == v.id %} selected {% endif %}>
+                            {{ v.modelo }} {% if v.id in ocupados %} (EM USO) {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <!-- Alerta inline (mostrado via JS quando o veículo selecionado estiver em uso) -->
+                <div id="veiculo-alert" class="alert alert-danger mt-2 d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Veículo selecionado no momento está em uso. Escolha outro veículo.
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3 text-start">
+                    <label class="form-label fw-bold text-secondary text-uppercase">KM de Saída</label>
+                    {{ form.km_saida(class="form-control border-primary-subtle", placeholder="Ex: 15420") }}
+                </div>
+                <div class="col-md-6 mb-3 text-start">
+                    <label class="form-label fw-bold text-secondary text-uppercase">Foto do Painel</label>
+                    {{ form.foto_km_saida(class="form-control border-primary-subtle") }}
+                </div>
+            </div>
+
+            <div class="mb-4 text-start">
+                <label class="form-label fw-bold text-secondary text-uppercase">Destino / Finalidade</label>
+                {{ form.destino_finalidade(class="form-control border-primary-subtle", placeholder="Ex: Brasília - Reunião SEGOV") }}
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-lg py-3 shadow-sm fw-bold text-uppercase" style="background-color: #003366;">
+                    <i class="bi bi-play-circle-fill me-2"></i> Iniciar Viagem
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-link text-secondary text-decoration-none">
+                    Cancelar e Voltar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function() {
+            // Lista de veículos ocupados vinda do servidor
+            const ocupados = new Set({{ ocupados|tojson }});
+
+            const select = document.getElementById('veiculo_modelo');
+            const btn = document.getElementById('btnSubmit');
+            const alertBox = document.getElementById('veiculo-alert');
+
+            function atualizarEstado() {
+                const val = select.value;
+                if (!val) {
+                    // sem seleção -> bloquear submit até preencher
+                    btn.disabled = true;
+                    alertBox.classList.add('d-none');
+                    return;
+                }
+
+                // value vem como string; convert para int para comparação
+                const id = parseInt(val, 10);
+                if (!isNaN(id) && ocupados.has(id)) {
+                    btn.disabled = true;
+                    alertBox.classList.remove('d-none');
+                } else {
+                    btn.disabled = false;
+                    alertBox.classList.add('d-none');
+                }
+            }
+
+            // Checa estado ao carregar a página
+            document.addEventListener('DOMContentLoaded', function() {
+                // Inicialmente, desabilita se não houver seleção
+                atualizarEstado();
+            });
+
+            // Atualiza estado sempre que o select muda
+            select.addEventListener('change', atualizarEstado);
+
+            // Proteção extra: antes de submeter, revalida no client (server já valida também)
+            document.getElementById('form-saida').addEventListener('submit', function(e) {
+                const id = parseInt(select.value || '', 10);
+                if (isNaN(id) || ocupados.has(id)) {
+                    e.preventDefault();
+                    alertBox.classList.remove('d-none');
+                    btn.disabled = true;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

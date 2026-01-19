@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrigir Viagem - Câmara</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container mt-5" style="max-width: 500px;">
+        
+            <h2 class="fw-bold text-center h4 mb-4" style="color: #003366;">
+            <i class="bi bi-pencil-square" style="color: #003366;"></i> Ajuste de Registro
+            </h2>
+
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4 text-primary">Corrigir Dados da Viagem</h5>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Veículo Utilizado</label>
+                        <select name="veiculo" class="form-select">
+                            {% for v in veiculos %}
+                            <option value="{{ v }}" {{ 'selected' if viagem.veiculo.modelo == v }}>{{ v }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Destino / Finalidade</label>
+                        <input type="text" name="destino" class="form-control" value="{{ viagem.destino_finalidade }}">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label fw-bold small text-uppercase text-muted">KM Inicial</label>
+                            <input type="number" step="0.1" name="km_saida" class="form-control" value="{{ viagem.km_saida }}">
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-bold small text-uppercase text-muted">KM Final</label>
+                            <input type="number" step="0.1" name="km_chegada" class="form-control" value="{{ viagem.km_chegada if viagem.km_chegada else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold py-2">SALVAR ALTERAÇÕES</button>
+                        <a href="{{ url_for('historico') }}" class="btn btn-outline-secondary">CANCELAR</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+    <p class="fw-bold small" style="color: #003366; opacity: 0.8;">
+        Câmara Municipal de Novo Gama
+    </p>
+</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

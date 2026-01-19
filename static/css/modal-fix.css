@@ -1,0 +1,104 @@
+/* modal-fix.css
+   Regras para estabilizar o modal e evitar "tremor" causado por hover/transition.
+   Cole este arquivo em static/css/modal-fix.css e importe-o *depois* do seu style.css:
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/modal-fix.css') }}">
+*/
+
+/* --- Bootstrap modal: desabilita transições que causam reflow/animacao grande --- */
+.modal,
+.modal-backdrop,
+.modal-dialog {
+  transition: none !important;
+  -webkit-transition: none !important;
+  animation-duration: .25s !important;
+  -webkit-animation-duration: .25s !important;
+}
+
+/* Garante posicionamento fixo do modal (evita problemas quando ancestrais têm transform) */
+.modal {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Torna o diálogo mais previsível e evita "pulos" de tamanho */
+.modal-dialog {
+  max-width: 90vw;
+  margin: 1.5rem auto;
+}
+
+/* Reserva espaço vertical e centraliza o conteúdo do modal para evitar reflows */
+.modal-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh; /* ajuste se necessário */
+  padding: 0.5rem;
+  background: transparent;
+}
+
+/* Imagem dentro do modal: dimensionamento responsivo sem causar reflows */
+.modal-body img {
+  max-width: 100%;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* --- Miniaturas e cards: transições específicas (evita transition: all) --- */
+.img-miniatura {
+  height: 80px;
+  width: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  /* transição limitada apenas ao filtro (não afeta layout) */
+  transition: filter .18s ease-in-out;
+}
+.img-miniatura:hover {
+  filter: brightness(0.8);
+}
+
+/* Card: transição apenas em propriedades visuais que não causam reflow */
+.card-ocorrencia {
+  transition: transform .18s ease, box-shadow .18s ease;
+  border-left: 6px solid transparent;
+}
+.card-ocorrencia:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+/* Botões: transição limitada */
+.btn-custom {
+  transition: background-color .25s ease, box-shadow .25s ease, transform .18s ease;
+}
+
+/* --- Enquanto um modal está aberto: reduzir/neutralizar hover e transições no fundo --- */
+/* Mantemos o modal interativo (ele está no <body>), mas evitamos qualquer efeito de hover
+   que possa causar reflow/scrollbar/pulo no conteúdo de fundo. */
+body.modal-open .card-ocorrencia,
+body.modal-open .card-ocorrencia * {
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Impede reações ao hover nas miniaturas enquanto modal aberto.
+   A imagem do modal está fora desses elementos (movida para body pelo modal-fix.js),
+   então pointer-events:none no fundo não afetará a interação com o modal. */
+body.modal-open .img-miniatura,
+body.modal-open .img-miniatura * {
+  transition: none !important;
+  filter: none !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Opcional: se você tiver regras globais problemáticas (ex: transition: all),
+   adicione exceções específicas aqui em vez de desativar tudo globalmente. */
