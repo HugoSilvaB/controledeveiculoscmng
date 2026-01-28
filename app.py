@@ -291,18 +291,19 @@ def excluir_veiculo(id):
 def registrar_saida():
     form = RegistroSaidaForm()
     veiculos = Veiculo.query.all()
+    
+    # Força o banco a ler os dados mais recentes antes de listar ocupados
+    db.session.expire_all()
     ocupados = {r.veiculo_id for r in RegistroUso.query.filter_by(km_chegada=None).all()}
 
-    # choices usam id (coerce=int) e label informativo
     form.veiculo_modelo.choices = [
         (v.id, f"{v.modelo} {'(EM USO)' if v.id in ocupados else ''}") for v in veiculos
     ]
 
     if form.validate_on_submit():
         selecionado_id = form.veiculo_modelo.data
-        # Validação server-side (defesa em profundidade)
         if selecionado_id in ocupados:
-            flash('Veículo selecionado já está em uso. Escolha outro.', 'danger')
+            flash('Veículo selecionado já está em uso.', 'danger')
             return redirect(url_for('registrar_saida'))
 
         v = db.session.get(Veiculo, selecionado_id)
@@ -312,7 +313,6 @@ def registrar_saida():
 
         novo = RegistroUso(
             usuario_id=current_user.id,
-            # Se o gabinete do usuário for vazio, usa um texto padrão para não dar erro
             gabinete_vereador=current_user.gabinete if current_user.gabinete else "Administrativo/Geral",
             motorista_nome=current_user.nome,
             veiculo_id=v.id,
@@ -321,10 +321,20 @@ def registrar_saida():
             destino_finalidade=form.destino_finalidade.data,
             data_hora_saida=datetime.now()
         )
-        db.session.add(novo)
-        db.session.commit()
-        flash('Saída registrada!', 'success')
-        return redirect(url_for('index'))
+        
+        try:
+            db.session.add(novo)
+            db.session.commit()
+            # AJUSTE 1: Limpa o cache da sessão para a próxima requisição ver o dado novo
+            db.session.expire_all() 
+            flash('Saída registrada!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro ao salvar: {e}', 'danger')
+            return redirect(url_for('registrar_saida'))
+
+        # AJUSTE 2: Redireciona com um parâmetro para evitar cache do navegador
+        return redirect(url_for('index', v=datetime.now().timestamp()))
 
     return render_template('registrar_saida.html', form=form, veiculos=veiculos, ocupados=list(ocupados))
 
@@ -650,3 +660,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
