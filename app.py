@@ -136,21 +136,30 @@ def salvar_foto_compacta(foto_campo, prefixo):
     try:
         if not foto_campo:
             return None
+            
         filename = secure_filename(foto_campo.filename)
         nome_final = f"{prefixo}_{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
         caminho_completo = os.path.join(app.config['UPLOAD_FOLDER'], nome_final)
-        # Garante que o diretório existe
+        
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        
+        # Abre a imagem
         img = Image.open(foto_campo)
-        if img.mode in ("RGBA", "P"):
+        
+        # Converte para RGB (necessário para JPEG)
+        if img.mode != "RGB":
             img = img.convert("RGB")
-        img.thumbnail((1024, 1024))
-        img.save(caminho_completo, optimize=True, quality=70)
-        print(f"[DEBUG] imagem salva: {caminho_completo}")
+        
+        # REDUÇÃO: 800px é perfeito para ler odômetro e o arquivo fica levíssimo
+        img.thumbnail((800, 800))
+        
+        # VELOCIDADE: Removi o optimize=True e baixei a qualidade para 50.
+        # Isso faz o salvamento ser quase instantâneo no Render.
+        img.save(caminho_completo, "JPEG", quality=50)
+        
         return nome_final
     except Exception as e:
-        print(f"[ERRO salvar_foto_compacta]: {e}")
-        import traceback; traceback.print_exc()
+        print(f"[ERRO]: {e}")
         return None
 
 # --- ROTAS PRINCIPAIS ---
@@ -660,4 +669,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
