@@ -312,7 +312,8 @@ def registrar_saida():
 
         novo = RegistroUso(
             usuario_id=current_user.id,
-            gabinete_vereador=current_user.gabinete,
+            # Se o gabinete do usuário for vazio, usa um texto padrão para não dar erro
+            gabinete_vereador=current_user.gabinete if current_user.gabinete else "Administrativo/Geral",
             motorista_nome=current_user.nome,
             veiculo_id=v.id,
             km_saida=form.km_saida.data,
